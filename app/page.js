@@ -90,7 +90,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Background background={"https://i.imgur.com/BvdvdaM.jpeg"} />
+      <Background />
       {loadingStreamers ? (
         <div className="fixed inset-0 flex justify-center items-center z-10">
           <div className="animate-spin">
@@ -102,7 +102,7 @@ export default function HomePage() {
           {liveStreamers.length > 0 && (
             <div className="flex flex-wrap gap-6">
               {liveStreamers.map((streamer, index) => (
-                <StreamerCard streamer={streamer} index={index} />
+                <StreamerCard key={index} streamer={streamer} index={index} />
               ))}
             </div>
           )}
@@ -110,7 +110,7 @@ export default function HomePage() {
             <div>
               <div className="flex flex-wrap gap-6">
                 {offlineStreamers.map((streamer, index) => (
-                  <StreamerCard streamer={streamer} index={index} />
+                  <StreamerCard key={index} streamer={streamer} index={index} />
                 ))}
               </div>
             </div>

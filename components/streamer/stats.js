@@ -4,6 +4,7 @@ import classNames from "classnames";
 import Icon from "../icon";
 import {
   CALCULATE_LASTSTREAM,
+  CALCULATE_UPTIME,
   CALCULATE_UPTIME2,
   FORMAT_NUMBER,
 } from "@/lib/utils";
@@ -68,7 +69,7 @@ export default function StreamerStats({ streamer }) {
         icon={{ name: "solar:eye-bold" }}
       />
       <StreamerStat
-        text={CALCULATE_UPTIME2(streamer.startedAt)}
+        text={CALCULATE_UPTIME(streamer.startedAt)}
         icon={{ name: "solar:clock-circle-bold" }}
         noRightBorder
       />

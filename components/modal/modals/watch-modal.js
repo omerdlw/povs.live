@@ -6,6 +6,7 @@ import { useWatch } from "@/contexts/watch-context";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Title from "../title";
+import Icon from "@/components/icon";
 
 export default function WatchModal() {
   const { streamersData, loadingStreamers } = useStreamer();
@@ -21,8 +22,10 @@ export default function WatchModal() {
 
   if (loadingStreamers) {
     return (
-      <div className="flex items-center justify-center min-h-[300px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+      <div className="size-96 center">
+        <div className="animate-spin">
+          <Icon icon="mingcute:loading-3-fill" size={40} />
+        </div>
       </div>
     );
   }

@@ -1,10 +1,14 @@
+"use client";
 import Controls from "@/components/controls";
 import { AppProviders } from "./providers";
 import { montserrat } from "@/fonts";
 import Nav from "@/components/nav";
 import "./globals.css";
+import { usePathname } from "next/navigation";
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+  
   return (
     <html lang="en">
       <body
@@ -12,8 +16,8 @@ export default function RootLayout({ children }) {
       >
         <AppProviders>
           {children}
-          <Nav />
-          <Controls />
+          {pathname !== "/watch" && <Nav />}
+          {pathname !== "/watch" && <Controls />}
         </AppProviders>
       </body>
     </html>
