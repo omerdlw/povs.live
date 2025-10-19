@@ -1,0 +1,91 @@
+"use client"; // <--- Bu satırı ekleyin
+
+import { useNavigation } from "../../hooks/use-navigation"; // Yolu kontrol edin
+import { useState } from "react";
+import classNames from "classnames";
+import { Card } from "./card";
+import { MotionConfig, motion, AnimatePresence } from "framer-motion";
+import { ANIMATION_CONFIG } from "./constants";
+
+export default function Nav() {
+  const {
+    expanded,
+    setExpanded,
+    activeIndex,
+    navigate,
+    navigationItems,
+    activeItemHasAction,
+    showSkeleton,
+    setIsHovered,
+  } = useNavigation(); // Bu hook artık istemci bileşeni içinde çağrılıyor
+
+  const [actionHeight, setActionHeight] = useState(0); // Bu da bir istemci hook'u
+  const baseCardHeight = 75;
+
+  const containerHeight =
+    activeItemHasAction && actionHeight > 0
+      ? baseCardHeight + actionHeight + 10
+      : baseCardHeight;
+
+  return (
+    <MotionConfig transition={ANIMATION_CONFIG.transition}>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            className="fixed inset-0 backdrop-blur-lg z-40 cursor-pointer"
+            onClick={() => setExpanded(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="fixed w-screen h-screen inset-0 -z-10 dark:bg-gradient-to-t dark:from-black dark:via-black/40 dark:to-black/50 bg-gradient-to-t from-white via-white/40 to-white/50"></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div
+        className={classNames(
+          "fixed bottom-4 left-1/2 -translate-x-2/4 w-[300px] mx-auto z-50 select-none"
+        )} // classNames importunu eklediğinizden emin olun
+        id="nav-card-stack"
+      >
+        <div
+          className="relative"
+          style={{
+            height: `${containerHeight}px`,
+            transition: "height 300ms ease-in-out",
+          }}
+        >
+          <AnimatePresence mode="popLayout">
+            {navigationItems.map((item, i) => {
+              // 'link' yerine 'item'
+              const position =
+                (i - activeIndex + navigationItems.length) %
+                navigationItems.length;
+              const isTop = position === 0;
+
+              return (
+                <Card
+                  onClick={() =>
+                    // Tıklama işlevini güncelle
+                    !item.skeleton &&
+                    (expanded
+                      ? navigate(item.code) // Sunucu kodunu navigate'e gönder
+                      : isTop && setExpanded(true))
+                  }
+                  onActionHeightChange={isTop ? setActionHeight : null}
+                  onMouseEnter={() => isTop && setIsHovered(true)}
+                  onMouseLeave={() => isTop && setIsHovered(false)}
+                  expanded={expanded}
+                  position={position}
+                  key={item.code || `skeleton-${i}`} // 'href' yerine 'code' kullan
+                  isTop={isTop}
+                  link={item} // 'link' prop'una sunucu objesini gönder
+                />
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      </div>
+    </MotionConfig>
+  );
+}
