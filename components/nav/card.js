@@ -9,6 +9,7 @@ import { Title } from "./card/title";
 import { Icon } from "./card/icon";
 import dynamic from "next/dynamic";
 import SearchAction from "./card/actions/search-action";
+import CountdownAction from "./card/actions/countdown-action";
 
 function CardComponent({
   link,
@@ -26,8 +27,11 @@ function CardComponent({
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [actionRef, actionSize] = useComponentSize();
+  const isCountdownActive = process.env.NEXT_PUBLIC_COUNTDOWN;
 
-  const ActionComponent = isTop ? <SearchAction /> : null;
+  const ActionComponent = isTop ? (
+    isCountdownActive ? <CountdownAction /> : <SearchAction />
+  ) : null;
 
   useEffect(() => {
     if (isTop && onActionHeightChange) {

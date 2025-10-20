@@ -10,7 +10,7 @@ export default function SettingsModal() {
   const themeOptions = [
     { id: "light", label: "Açık" },
     { id: "dark", label: "Koyu" },
-    { id: "system", label: "Sistem" }
+    { id: "system", label: "Sistem" },
   ];
 
   return (
@@ -28,7 +28,7 @@ export default function SettingsModal() {
                 key={option.id}
                 onClick={() => setTheme(option.id)}
                 className={cn(
-                  "p-4 rounded-[20px] font-medium transition-colors",
+                  "p-4 rounded-[20px] font-medium transition-colors cursor-pointer",
                   theme === option.id
                     ? "bg-purple-700 dark:bg-purple-500 text-white"
                     : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"
@@ -39,19 +39,22 @@ export default function SettingsModal() {
             ))}
           </div>
         </div>
-        
+
         <div>
           <h3 className="text-sm font-semibold mb-3">Yayıncı Kartı Boyutu</h3>
           <button
-            onClick={() => updateSettings("largeStreamerCard", !settings.largeStreamerCard)}
+            onClick={() =>
+              updateSettings("largeStreamerCard", !settings.largeStreamerCard)
+            }
             className={cn(
-              "w-full p-4 rounded-[20px] text-left font-medium transition-colors",
+              "w-full p-4 rounded-[20px] text-left font-medium transition-colors cursor-pointer",
               settings.largeStreamerCard
                 ? "bg-purple-700 dark:bg-purple-500 text-white"
                 : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"
             )}
           >
-            Büyük Yayıncı Kartı {settings.largeStreamerCard ? "(Açık)" : "(Kapalı)"}
+            Büyük Yayıncı Kartı{" "}
+            {settings.largeStreamerCard ? "(Açık)" : "(Kapalı)"}
           </button>
         </div>
       </div>

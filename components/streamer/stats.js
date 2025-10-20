@@ -48,7 +48,8 @@ export default function StreamerStats({ streamer }) {
           icon={{ name: "solar:history-bold" }}
           text={
             streamer?.lastStreamed
-              ? CALCULATE_LASTSTREAM(streamer.lastStreamed)
+              ? CALCULATE_LASTSTREAM(streamer.lastStreamed) +
+                " yayındaydı"
               : "Yayın bilgisi yok"
           }
           noRightBorder

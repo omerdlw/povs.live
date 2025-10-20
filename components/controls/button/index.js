@@ -10,7 +10,7 @@ export default function ControlsButton({
   if (icon && !text) {
     return (
       <div
-        className="size-[60px] center cursor-pointer rounded-3xl backdrop-blur-xl overflow-hidden bg-white/80 dark:bg-black/20 border border-black/10 dark:border-white/10 p-1"
+        className="size-[60px] center cursor-pointer rounded-3xl backdrop-blur-xl overflow-hidden bg-white/80 dark:bg-black/40 border border-black/10 dark:border-white/10 p-1"
         onClick={onClick}
       >
         {icon.startsWith("http") ? (
@@ -26,7 +26,7 @@ export default function ControlsButton({
 
   return (
     <div
-      className="h-[60px] center cursor-pointer rounded-3xl backdrop-blur-xl overflow-hidden bg-white/80 dark:bg-black/20 border border-black/10 dark:border-white/10 p-1"
+      className="h-[60px] center cursor-pointer rounded-3xl backdrop-blur-xl overflow-hidden bg-white/80 dark:bg-black/40 border border-black/10 dark:border-white/10 p-1"
       onClick={onClick}
     >
       {icon && icon.startsWith("http") ? (

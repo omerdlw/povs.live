@@ -1,6 +1,6 @@
-"use client"; // <--- Bu satırı ekleyin
+"use client";
 
-import { useNavigation } from "../../hooks/use-navigation"; // Yolu kontrol edin
+import { useNavigation } from "../../hooks/use-navigation";
 import { useState } from "react";
 import classNames from "classnames";
 import { Card } from "./card";
@@ -15,11 +15,10 @@ export default function Nav() {
     navigate,
     navigationItems,
     activeItemHasAction,
-    showSkeleton,
     setIsHovered,
-  } = useNavigation(); // Bu hook artık istemci bileşeni içinde çağrılıyor
+  } = useNavigation();
 
-  const [actionHeight, setActionHeight] = useState(0); // Bu da bir istemci hook'u
+  const [actionHeight, setActionHeight] = useState(0);
   const baseCardHeight = 75;
 
   const containerHeight =
@@ -45,7 +44,7 @@ export default function Nav() {
       <div
         className={classNames(
           "fixed bottom-4 left-1/2 -translate-x-2/4 w-[300px] mx-auto z-50 select-none"
-        )} // classNames importunu eklediğinizden emin olun
+        )}
         id="nav-card-stack"
       >
         <div
@@ -57,7 +56,6 @@ export default function Nav() {
         >
           <AnimatePresence mode="popLayout">
             {navigationItems.map((item, i) => {
-              // 'link' yerine 'item'
               const position =
                 (i - activeIndex + navigationItems.length) %
                 navigationItems.length;
@@ -66,10 +64,9 @@ export default function Nav() {
               return (
                 <Card
                   onClick={() =>
-                    // Tıklama işlevini güncelle
                     !item.skeleton &&
                     (expanded
-                      ? navigate(item.code) // Sunucu kodunu navigate'e gönder
+                      ? navigate(item.code)
                       : isTop && setExpanded(true))
                   }
                   onActionHeightChange={isTop ? setActionHeight : null}
@@ -77,9 +74,9 @@ export default function Nav() {
                   onMouseLeave={() => isTop && setIsHovered(false)}
                   expanded={expanded}
                   position={position}
-                  key={item.code || `skeleton-${i}`} // 'href' yerine 'code' kullan
+                  key={item.code || `skeleton-${i}`}
                   isTop={isTop}
-                  link={item} // 'link' prop'una sunucu objesini gönder
+                  link={item}
                 />
               );
             })}
