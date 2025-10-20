@@ -27,10 +27,14 @@ function CardComponent({
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [actionRef, actionSize] = useComponentSize();
-  const isCountdownActive = process.env.NEXT_PUBLIC_COUNTDOWN;
+  const isCountdownActive = true;
 
   const ActionComponent = isTop ? (
-    isCountdownActive ? <CountdownAction /> : <SearchAction />
+    isCountdownActive ? (
+      <CountdownAction />
+    ) : (
+      <SearchAction />
+    )
   ) : null;
 
   useEffect(() => {
