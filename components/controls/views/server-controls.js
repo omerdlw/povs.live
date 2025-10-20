@@ -20,25 +20,44 @@ export default function ServerControls({ playing, handleToggle, isCountdown }) {
         )}
         {!isCountdown && (
           <ControlsButton
-            icon="solar:settings-bold"
-            onClick={() => openModal("SETTINGS_MODAL")}
+            icon="solar:gallery-bold"
+            onClick={() =>
+              openModal(
+                "GALLERY_MODAL",
+                {
+                  apiEndpoint: "/api/venny/gallery",
+                  modalTitle: "Galeri Akışı",
+                },
+                "left"
+              )
+            }
+          />
+        )}
+        {!isCountdown && (
+          <ControlsButton
+            icon="solar:tv-bold"
+            onClick={() => openModal("WATCH_MODAL", {}, "center")}
           />
         )}
       </div>
       <div className="w-[300px] h-full shrink-0 flex items-center justify-center space-x-3 pointer-events-auto"></div>
       <div className="w-full h-full flex items-center justify-start space-x-3 pointer-events-auto">
+        {!isCountdown && (
+          <ControlsButton
+            icon="solar:settings-bold"
+            onClick={() => openModal("SETTINGS_MODAL")}
+          />
+        )}
         <ControlsButton
           icon="solar:face-scan-circle-bold"
           onClick={() =>
-            openModal("CONTACT_MODAL", { serverName: serverNameToSend })
+            openModal(
+              "CONTACT_MODAL",
+              { serverName: serverNameToSend },
+              "center"
+            )
           }
         />
-        {!isCountdown && (
-          <ControlsButton
-            icon="solar:tv-bold"
-            onClick={() => openModal("WATCH_MODAL")}
-          />
-        )}
       </div>
     </div>
   );

@@ -39,7 +39,7 @@ export const useNavigation = () => {
 
       return {
         ...server,
-        name: server.name.toUpperCase() + "Z",
+        name: server.name.toUpperCase(),
         href: server.code,
         description: descriptionText,
         icon: server.logo ? `${server.name}.png` : "solar:server-2-bold",

@@ -9,7 +9,7 @@ import {
   useMemo,
 } from "react";
 
-const STORAGE_KEY = "appSettings";
+const STORAGE_KEY = "POVS_SETTINGS";
 const DEFAULT_SETTINGS = {
   theme: "system",
   largeStreamerCard: false,
@@ -43,12 +43,29 @@ const SettingsContext = createContext(null);
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return getStoredSettings();
     }
     return initialSettings;
   });
-  const [isInitialized, setIsInitialized] = useState(typeof window !== 'undefined');
+  const [isInitialized, setIsInitialized] = useState(
+    typeof window !== "undefined"
+  );
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const allKeys = Object.keys(localStorage);
+        allKeys.forEach((key) => {
+          if (key !== STORAGE_KEY) {
+            localStorage.removeItem(key);
+          }
+        });
+      } catch (error) {
+        console.error("Failed to clean up localStorage:", error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!isInitialized) {

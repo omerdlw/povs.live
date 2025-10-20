@@ -27,7 +27,7 @@ function CardComponent({
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [actionRef, actionSize] = useComponentSize();
-  const isCountdownActive = true;
+  const isCountdownActive = false;
 
   const ActionComponent = isTop ? (
     isCountdownActive ? (

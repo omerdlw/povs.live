@@ -116,9 +116,11 @@ export default function HomePage() {
             </div>
           )}
           {sortedAndFilteredStreamers.length === 0 && (
-            <p className="text-center text-gray-400 dark:text-gray-500 mt-10">
-              Gösterilecek yayıncı bulunamadı.
-            </p>
+            <div className="p-10">
+              <p className="text-xl text-center">
+                Yayıncı verileri alınamadı veya gösterilecek bir yayıncı yok
+              </p>
+            </div>
           )}
           <div className="h-32"></div> {/* Alt boşluk */}
         </div>

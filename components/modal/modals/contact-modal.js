@@ -16,7 +16,7 @@ export default function ContactModal({ close, data }) {
 
   const validate = () => {
     if (!message || message.trim().length < 5) {
-      setError("Lütfen en az 5 karakterlik bir mesaj yazın.");
+      setError("Lütfen en az 5 karakterlik bir mesaj yazın");
       return false;
     }
     return true;
@@ -26,7 +26,7 @@ export default function ContactModal({ close, data }) {
     setError("");
     if (!validate()) return;
     if (!serverName) {
-      setError("Sunucu bilgisi bulunamadı. Lütfen tekrar deneyin.");
+      setError("Sunucu bilgisi bulunamadı. Lütfen tekrar deneyin");
       return;
     }
 
@@ -43,7 +43,7 @@ export default function ContactModal({ close, data }) {
         else if (typeof closeFromContext === "function") closeFromContext();
       }, 900);
     } else {
-      setError("Mesaj gönderilirken hata oluştu. Lütfen tekrar deneyin.");
+      setError("Mesaj gönderilirken hata oluştu. Lütfen tekrar deneyin");
     }
   };
 

@@ -19,7 +19,7 @@ export const apiService = {
       }
 
       return {
-        STREAMERS: data.STREAMERS || { twitch: [], kick: [] },
+        STREAMERS: data.STREAMERS || [],
         SPONSORED_STREAMER: data.SPONSORED_STREAMER || "",
         BACKGROUND: data.BACKGROUND,
         NAME: data.NAME || serverName,
@@ -48,7 +48,7 @@ export const apiService = {
       activeSubscriptions[serverName] = serverRef;
 
       return {
-        STREAMERS: data.STREAMERS || { twitch: [], kick: [] },
+        STREAMERS: data.STREAMERS || [],
         SPONSORED_STREAMER: data.SPONSORED_STREAMER || "",
         BACKGROUND: data.BACKGROUND,
         NAME: data.NAME,
@@ -108,7 +108,7 @@ export const apiService = {
       const data = snapshot.val();
       if (data) {
         callback({
-          STREAMERS: data.STREAMERS || { twitch: [], kick: [] },
+        STREAMERS: data.STREAMERS || [],
           SPONSORED_STREAMER: data.SPONSORED_STREAMER || "",
           ANNOUNCEMENT: data.ANNOUNCEMENT,
           CONTACTS: data.CONTACTS || [],
@@ -135,7 +135,7 @@ export const apiService = {
         if (!data) return;
 
         onChange({
-          STREAMERS: data.STREAMERS || { twitch: [], kick: [] },
+        STREAMERS: data.STREAMERS || [],
           SPONSORED_STREAMER: data.SPONSORED_STREAMER || "",
           ANNOUNCEMENT: data.ANNOUNCEMENT,
           CONTACTS: data.CONTACTS || [],

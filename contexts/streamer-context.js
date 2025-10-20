@@ -39,7 +39,7 @@ export function StreamerProvider({ children }) {
         const details = await apiService.getServerDetails(serverNameToFetch);
         setServerDetails(details);
         const kickUsernames =
-          details?.STREAMERS?.kick?.filter(
+          details?.STREAMERS?.filter(
             (username) => typeof username === "string" && username.trim() !== ""
           ) || [];
         setStreamerUsernames(kickUsernames); // Bu, aşağıdaki useEffect'i tetikleyecek
