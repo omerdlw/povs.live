@@ -64,6 +64,12 @@ export default function ServerControls({ playing, handleToggle, isCountdown }) {
             )
           }
         />
+        {!isCountdown && (
+          <ControlsButton
+            icon={"streamline-plump:theater-mask-solid"}
+            onClick={() => openModal("CONTENT_CREATORS_MODAL", {}, "right")}
+          />
+        )}
       </div>
     </div>
   );

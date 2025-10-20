@@ -5,7 +5,6 @@ import Icon from "../icon";
 import {
   CALCULATE_LASTSTREAM,
   CALCULATE_UPTIME,
-  CALCULATE_UPTIME2,
   FORMAT_NUMBER,
 } from "@/lib/utils";
 
@@ -48,8 +47,7 @@ export default function StreamerStats({ streamer }) {
           icon={{ name: "solar:history-bold" }}
           text={
             streamer?.lastStreamed
-              ? CALCULATE_LASTSTREAM(streamer.lastStreamed) +
-                " yayındaydı"
+              ? CALCULATE_LASTSTREAM(streamer.lastStreamed) + " yayındaydı"
               : "Yayın bilgisi yok"
           }
           noRightBorder
