@@ -80,24 +80,33 @@ export default function KickClipModal({ close }) {
     }
   };
 
-  const handleDownload = async () => {
-    if (!clipInfo || !clipInfo.videoUrl) return;
+  const handleDownload = () => {
+    if (!clipInfo || !clipInfo.videoUrl || isDownloading) return;
 
     setIsDownloading(true);
     try {
-      const response = await fetch(clipInfo.videoUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      // Güvenli dosya adı ve video URL'sini URL parametresi için kodluyoruz
+      const safeFileName = encodeURIComponent(
+        `${clipInfo.streamerName}_${clipInfo.id}.mp4`
+      );
+      const safeVideoUrl = encodeURIComponent(clipInfo.videoUrl);
+
+      // Kendi API rotamızın URL'sini oluşturuyoruz
+      const downloadUrl = `/api/download-clip?url=${safeVideoUrl}&fileName=${safeFileName}`;
+
+      // Fetch veya blob'a gerek yok. Tarayıcının bu URL'yi açması
+      // API'mizdeki 'Content-Disposition' başlığı sayesinde indirmeyi tetikleyecek.
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `${clipInfo.streamerName}_${clipInfo.id}.mp4`;
+      a.href = downloadUrl;
+      // 'download' niteliğine GEREK YOK, çünkü API'miz hallediyor.
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+
+      // Butonu kısa bir süre sonra normale döndür
+      setTimeout(() => setIsDownloading(false), 1500);
     } catch (err) {
-      setError("Klip indirilirken bir hata oluştu.");
-    } finally {
+      setError("İndirme başlatılırken bir hata oluştu.");
       setIsDownloading(false);
     }
   };
