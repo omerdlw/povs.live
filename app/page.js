@@ -2,13 +2,14 @@
 
 import { useNavigationContext } from "@/contexts/navigation-context";
 import { useStreamer } from "@/contexts/streamer-context";
+import { useSettings } from "@/contexts/settings-context";
 import StreamerCard from "@/components/streamer";
 import Background from "@/components/background";
 import Icon from "@/components/icon";
 import { useMemo } from "react";
 import { apiService } from "@/services/apiService";
 
-const sortStreamersBasic = (streamersData) => {
+const sortStreamersBasic = (streamersData, favorites = []) => {
   const streamersArray = Object.values(streamersData).filter(Boolean);
   if (!streamersArray || streamersArray.length === 0) {
     return [];
@@ -16,29 +17,31 @@ const sortStreamersBasic = (streamersData) => {
   return streamersArray.sort((a, b) => {
     if (!a || !b) return 0;
 
+    const isAFavorite = favorites.includes(a.name?.toLowerCase());
+    const isBFavorite = favorites.includes(b.name?.toLowerCase());
+
+    if (isAFavorite !== isBFavorite) {
+      return isAFavorite ? -1 : 1;
+    }
+
     const isLiveA = a.live;
     const isLiveB = b.live;
 
-    // Önce canlı/çevrimdışı kontrolü
     if (isLiveA !== isLiveB) {
       return isLiveA ? -1 : 1;
     }
 
-    // İkisi de canlı ise
     if (isLiveA && isLiveB) {
       const isGTAVA = a.game?.toLowerCase().includes("gta v");
       const isGTAVB = b.game?.toLowerCase().includes("gta v");
 
-      // GTA V kontrolü
       if (isGTAVA !== isGTAVB) {
         return isGTAVA ? -1 : 1;
       }
 
-      // İkisi de GTA V veya ikisi de değilse izleyici sayısına göre sırala
       return (b.viewers || 0) - (a.viewers || 0);
     }
 
-    // İkisi de çevrimdışı ise son yayın tarihine göre sırala
     if (!isLiveA && !isLiveB) {
       const dateA = a.lastStreamed ? new Date(a.lastStreamed).getTime() : 0;
       const dateB = b.lastStreamed ? new Date(b.lastStreamed).getTime() : 0;
@@ -52,12 +55,13 @@ const sortStreamersBasic = (streamersData) => {
 export default function HomePage() {
   const { streamersData, loadingStreamers } = useStreamer();
   const { searchQuery } = useNavigationContext();
+  const { settings } = useSettings();
 
   const sortedAndFilteredStreamers = useMemo(() => {
     if (!streamersData || Object.keys(streamersData).length === 0) {
       return [];
     }
-    const sorted = sortStreamersBasic(streamersData);
+    const sorted = sortStreamersBasic(streamersData, settings.favorites || []);
 
     if (!searchQuery) {
       return sorted;
@@ -72,7 +76,7 @@ export default function HomePage() {
       return searchTargets.some((t) => t.includes(lowerQuery));
     });
     return filtered;
-  }, [streamersData, searchQuery]);
+  }, [streamersData, searchQuery, settings.favorites]);
 
   const { liveStreamers, offlineStreamers } = useMemo(() => {
     return sortedAndFilteredStreamers.reduce(
@@ -122,7 +126,7 @@ export default function HomePage() {
               </p>
             </div>
           )}
-          <div className="h-32"></div> {/* Alt boşluk */}
+          <div className="h-32"></div>
         </div>
       )}
     </>

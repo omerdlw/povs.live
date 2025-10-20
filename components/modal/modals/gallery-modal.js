@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Title from "../title";
 import Icon from "@/components/icon";
 
-export default function DiscordFeedModal({ close, data }) {
+export default function GalleryModal({ close, data }) {
   const { apiEndpoint, modalTitle } = data;
 
   const [loading, setLoading] = useState(true);

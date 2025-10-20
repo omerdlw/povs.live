@@ -13,6 +13,7 @@ const STORAGE_KEY = "POVS_SETTINGS";
 const DEFAULT_SETTINGS = {
   theme: "system",
   largeStreamerCard: false,
+  favorites: [],
 };
 
 const initialSettings = {
@@ -22,7 +23,8 @@ const initialSettings = {
 const getStoredSettings = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : initialSettings;
+    const parsed = stored ? JSON.parse(stored) : {};
+    return { ...DEFAULT_SETTINGS, ...parsed };
   } catch (error) {
     console.error("Failed to parse stored settings:", error);
     return initialSettings;
@@ -129,15 +131,35 @@ export function SettingsProvider({ children }) {
     [updateSettings]
   );
 
+  const toggleFavorite = useCallback(
+    (streamerName) => {
+      if (!streamerName) return;
+      const lowerCaseName = streamerName.toLowerCase();
+      setSettings((prev) => {
+        const currentFavorites = prev.favorites || [];
+        const isFavorite = currentFavorites.includes(lowerCaseName);
+        const newFavorites = isFavorite
+          ? currentFavorites.filter((name) => name !== lowerCaseName)
+          : [...currentFavorites, lowerCaseName];
+
+        const newSettings = { ...prev, favorites: newFavorites };
+        saveSettings(newSettings);
+        return newSettings;
+      });
+    },
+    [updateSettings]
+  );
+
   const contextValue = useMemo(
     () => ({
       settings,
       updateSettings,
       theme: settings.theme,
       setTheme,
+      toggleFavorite,
       isInitialized,
     }),
-    [settings, updateSettings, setTheme, isInitialized]
+    [settings, updateSettings, setTheme, toggleFavorite, isInitialized]
   );
 
   return (
