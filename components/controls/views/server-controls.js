@@ -12,6 +12,12 @@ export default function ServerControls({ playing, handleToggle, isCountdown }) {
   return (
     <div className="w-full h-full flex space-x-3">
       <div className="w-full h-full flex items-center justify-end space-x-3 pointer-events-auto">
+        {!isCountdown && (
+          <ControlsButton
+            icon="solar:video-frame-play-vertical-bold"
+            onClick={() => openModal("KICK_CLIP_MODAL", {}, "center")}
+          />
+        )}
         {handleToggle && (
           <ControlsButton
             icon={!playing ? "solar:play-bold" : "solar:pause-bold"}

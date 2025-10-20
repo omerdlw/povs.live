@@ -80,33 +80,42 @@ export default function KickClipModal({ close }) {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!clipInfo || !clipInfo.videoUrl || isDownloading) return;
 
     setIsDownloading(true);
+    setError("");
+
     try {
-      // Güvenli dosya adı ve video URL'sini URL parametresi için kodluyoruz
-      const safeFileName = encodeURIComponent(
-        `${clipInfo.streamerName}_${clipInfo.id}.mp4`
-      );
+      const safeFileName = `${clipInfo.streamerName}_${clipInfo.id}.mp4`;
       const safeVideoUrl = encodeURIComponent(clipInfo.videoUrl);
 
-      // Kendi API rotamızın URL'sini oluşturuyoruz
-      const downloadUrl = `/api/download-clip?url=${safeVideoUrl}&fileName=${safeFileName}`;
+      // API'ye istek at ve blob olarak indir
+      const response = await fetch(
+        `/api/download-clip?url=${safeVideoUrl}&fileName=${encodeURIComponent(
+          safeFileName
+        )}`
+      );
 
-      // Fetch veya blob'a gerek yok. Tarayıcının bu URL'yi açması
-      // API'mizdeki 'Content-Disposition' başlığı sayesinde indirmeyi tetikleyecek.
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "İndirme başarısız");
+      }
+
+      // Blob'u indir
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = downloadUrl;
-      // 'download' niteliğine GEREK YOK, çünkü API'miz hallediyor.
+      a.href = url;
+      a.download = safeFileName;
       document.body.appendChild(a);
       a.click();
+      window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      // Butonu kısa bir süre sonra normale döndür
-      setTimeout(() => setIsDownloading(false), 1500);
+      setIsDownloading(false);
     } catch (err) {
-      setError("İndirme başlatılırken bir hata oluştu.");
+      setError(err.message || "İndirme başlatılırken bir hata oluştu.");
       setIsDownloading(false);
     }
   };
