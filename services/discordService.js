@@ -2,7 +2,7 @@ async function getDiscordImages(channelId) {
   const auth = process.env.DISCORD_TOKEN;
 
   if (!auth) {
-    console.error("DISCORD_TOKEN ortam değişkeni ayarlanmamış.");
+    console.error("Ortam değişkeni ayarlanmamış.");
     return { error: "Sunucu yapılandırma hatası." };
   }
 
