@@ -9,7 +9,7 @@ import Countdown from "@/components/countdown";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
-  const isCountdownActive = process.env.NEXT_PUBLIC_COUNTDOWN;
+  const isCountdownActive = false;
 
   return (
     <html lang="en">
