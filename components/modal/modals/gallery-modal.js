@@ -75,7 +75,7 @@ export default function GalleryModal({ close, data }) {
                 <img
                   key={i}
                   src={imgUrl}
-                  alt="img"
+                  alt="Resmi görmek için VPN'e bağlanınız"
                   className="w-full rounded-[15px] mt-2"
                 />
               ))}

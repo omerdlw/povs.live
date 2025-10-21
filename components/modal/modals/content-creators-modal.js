@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Title from "../title";
-import Icon from "@/components/icon";
 import { youtubers } from "@/data/youtubers";
+import { useState, useEffect } from "react";
+import Icon from "@/components/icon";
+import Title from "../title";
 
 export default function ContentCreatorsModal({ close, data }) {
+  const [creatorsData, setCreatorsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [creatorsData, setCreatorsData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {

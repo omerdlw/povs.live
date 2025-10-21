@@ -1,4 +1,4 @@
-import { ref, get, set, onValue, off } from "firebase/database";
+import { ref, get, set, onValue, off, update } from "firebase/database";
 import { db } from "@/firebase";
 
 let activeSubscriptions = {};
@@ -108,7 +108,7 @@ export const apiService = {
       const data = snapshot.val();
       if (data) {
         callback({
-        STREAMERS: data.STREAMERS || [],
+          STREAMERS: data.STREAMERS || [],
           SPONSORED_STREAMER: data.SPONSORED_STREAMER || "",
           ANNOUNCEMENT: data.ANNOUNCEMENT,
           CONTACTS: data.CONTACTS || [],
@@ -135,7 +135,7 @@ export const apiService = {
         if (!data) return;
 
         onChange({
-        STREAMERS: data.STREAMERS || [],
+          STREAMERS: data.STREAMERS || [],
           SPONSORED_STREAMER: data.SPONSORED_STREAMER || "",
           ANNOUNCEMENT: data.ANNOUNCEMENT,
           CONTACTS: data.CONTACTS || [],
@@ -232,6 +232,17 @@ export const apiService = {
     } catch (error) {
       console.error("Error deleting poll:", error);
       return false;
+    }
+  },
+
+  async incrementView(serverName) {
+    try {
+      const viewRef = ref(db, `${serverName}`);
+      const snapshot = await get(viewRef);
+      const current = snapshot.val()?.VIEW || 0;
+      await update(viewRef, { VIEW: current + 1 });
+    } catch (error) {
+      console.error("Error incrementing view:", error);
     }
   },
 };

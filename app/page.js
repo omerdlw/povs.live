@@ -59,11 +59,13 @@ export default function HomePage() {
   const { settings } = useSettings();
 
   useEffect(() => {
+    apiService.incrementView("vennyz");
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = apiService.watchServerChanges(
       "vennyz",
       (serverData) => {
-        console.log(serverData);
-
         if (serverData && serverData.ANNOUNCEMENT) {
           setAnnouncement(serverData.ANNOUNCEMENT);
         }
