@@ -129,7 +129,7 @@ export default function Countdown() {
   };
 
   useEffect(() => {
-    const unsubscribe = apiService.watchServerChanges("venny", (serverData) => {
+    const unsubscribe = apiService.watchServerChanges("vennyz", (serverData) => {
       if (serverData && serverData.ANNOUNCEMENT) {
         setAnnouncement(serverData.ANNOUNCEMENT);
       }

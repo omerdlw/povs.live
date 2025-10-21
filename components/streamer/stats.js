@@ -5,6 +5,7 @@ import Icon from "../icon";
 import {
   CALCULATE_LASTSTREAM,
   CALCULATE_UPTIME,
+  // CALCULATE_UPTIME2, // Bu fonksiyon lib/utils.js dosyasında bulunmuyor, kaldırıldı.
   FORMAT_NUMBER,
 } from "@/lib/utils";
 

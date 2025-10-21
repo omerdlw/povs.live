@@ -105,8 +105,9 @@ export const streamerService = {
           channelData.user?.profile_pic ||
           "https://files.kick.com/images/user/19420094/profile_image/conversion/default2-fullsize.webp",
         lastStreamed: videosData?.[0]?.start_time || null,
-        createdAt:
-          CALCULATE_UPTIME(channelData.user?.email_verified_at) || null,
+        // DÜZELTME: CALCULATE_UPTIME fonksiyonu burada yanlış kullanılıyordu.
+        // Süre hesaplayıcı değil, ham tarih atanmalı.
+        createdAt: channelData.user?.email_verified_at || null,
         name: channelData.user?.username,
         game: CONVERT_GAME(channelData.livestream?.categories?.[0]?.name) || "",
         slug:

@@ -39,7 +39,7 @@ function formatPublishedAt(dateString) {
 }
 
 async function getYouTubeChannelData(channelHandle) {
-  const API_KEY = "AIzaSyCkD-iFgkEzdkWQYkIF2IwYzm5dVcih6vw";
+  const API_KEY = process.env.GOOGLE_API_KEY;
   const BASE_URL = "https://www.googleapis.com/youtube/v3";
   let channelId = "";
   let channelTitle = channelHandle;
@@ -129,7 +129,7 @@ async function getYouTubeChannelData(channelHandle) {
 }
 
 export async function GET(request) {
-  const API_KEY = "AIzaSyCkD-iFgkEzdkWQYkIF2IwYzm5dVcih6vw";
+  const API_KEY = process.env.GOOGLE_API_KEY;
 
   if (!API_KEY || API_KEY === "BURAYA_KENDI_API_ANAHTARINIZI_YAPISTIRIN") {
     return NextResponse.json(

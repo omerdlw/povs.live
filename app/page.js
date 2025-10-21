@@ -6,7 +6,7 @@ import { useSettings } from "@/contexts/settings-context";
 import StreamerCard from "@/components/streamer";
 import Background from "@/components/background";
 import Icon from "@/components/icon";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apiService } from "@/services/apiService";
 
 const sortStreamersBasic = (streamersData, favorites = []) => {
@@ -54,8 +54,23 @@ const sortStreamersBasic = (streamersData, favorites = []) => {
 
 export default function HomePage() {
   const { streamersData, loadingStreamers } = useStreamer();
+  const [announcement, setAnnouncement] = useState(null);
   const { searchQuery } = useNavigationContext();
   const { settings } = useSettings();
+
+  useEffect(() => {
+    const unsubscribe = apiService.watchServerChanges(
+      "vennyz",
+      (serverData) => {
+        console.log(serverData);
+
+        if (serverData && serverData.ANNOUNCEMENT) {
+          setAnnouncement(serverData.ANNOUNCEMENT);
+        }
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   const sortedAndFilteredStreamers = useMemo(() => {
     if (!streamersData || Object.keys(streamersData).length === 0) {
@@ -95,6 +110,12 @@ export default function HomePage() {
   return (
     <>
       <Background />
+      {announcement && (
+        <div className="bg-white/80 dark:bg-black/40 p-4 flex items-center space-x-4 border-b border-black/10 dark:border-white/10 backdrop-blur-3xl">
+          <Icon size={30} icon={"ri:megaphone-fill"} />
+          <p>{announcement}</p>
+        </div>
+      )}
       {loadingStreamers ? (
         <div className="fixed inset-0 flex justify-center items-center z-10">
           <div className="animate-spin">
