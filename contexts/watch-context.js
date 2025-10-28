@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 
-const WatchContext = createContext(null); // null ile başlatmak daha iyi
+const WatchContext = createContext(null);
 const MAX_STREAMERS = 4;
 
 export function WatchProvider({ children }) {

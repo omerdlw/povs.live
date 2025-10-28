@@ -18,7 +18,7 @@ export default function StreamerAvatar({
     >
       {isHovered && (
         <div
-          className="absolute inset-0 rounded-[20px] cursor-pointer w-full h-full center z-10 p-1 bg-white/40 dark:bg-black/40 backdrop-blur-sm"
+          className="absolute inset-0 rounded-secondary cursor-pointer w-full h-full center z-10 p-1 bg-white/40 dark:bg-black/40 backdrop-blur-sm"
           onClick={handleFavoriteClick}
         >
           <Icon
@@ -28,7 +28,7 @@ export default function StreamerAvatar({
         </div>
       )}
       <img
-        className="w-full h-full shrink-0 object-cover rounded-[20px] bg-gray-300 dark:bg-gray-700" // Yüklenirken gri arkaplan
+        className="w-full h-full shrink-0 object-cover rounded-secondary bg-gray-300 dark:bg-gray-700" // Yüklenirken gri arkaplan
         src={streamer.avatar}
         alt={streamer.name}
         loading="lazy"

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/contexts/settings-context";
 import { useModal } from "@/contexts/modal-context";
-import { apiService } from "@/services/apiService";
-import ServerControls from "../controls/views/server-controls";
+import { apiService } from "@/services/firebase.service";
+import HomeControls from "../controls/views/home-controls";
 
 export default function Countdown() {
   const video1Ref = useRef(null);
@@ -129,11 +129,14 @@ export default function Countdown() {
   };
 
   useEffect(() => {
-    const unsubscribe = apiService.watchServerChanges("vennyz", (serverData) => {
-      if (serverData && serverData.ANNOUNCEMENT) {
-        setAnnouncement(serverData.ANNOUNCEMENT);
+    const unsubscribe = apiService.watchServerChanges(
+      "vennyz",
+      (serverData) => {
+        if (serverData && serverData.ANNOUNCEMENT) {
+          setAnnouncement(serverData.ANNOUNCEMENT);
+        }
       }
-    });
+    );
 
     return () => unsubscribe();
   }, []);
@@ -176,12 +179,12 @@ export default function Countdown() {
       <div className="w-screen h-screen -z-10 fixed inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent"></div>
       <div className="w-screen h-screen -z-10 fixed inset-0 bg-gradient-to-b from-black/70 via-transparent to-transparent"></div>
       {announcement && (
-        <div className="fixed top-0 left-0 right-0 w-auto z-20 border-b border-black/10 dark:border-white/10 text-sm opacity-60 backdrop-blur-lg p-4">
+        <div className="fixed top-0 left-0 right-0 w-auto z-20 border-b border-base/10 text-sm opacity-60 backdrop-blur-lg p-4">
           {announcement}
         </div>
       )}
       <div className="fixed left-0 right-0 bottom-0 w-full h-[100px] flex items-center justify-between z-30 select-none pointer-events-none">
-        <ServerControls
+        <HomeControls
           playing={playing}
           handleToggle={handleToggle}
           isCountdown={true}

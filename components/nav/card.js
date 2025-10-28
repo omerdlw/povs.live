@@ -1,122 +1,125 @@
+import { useMemo, useState, useEffect, useLayoutEffect } from "react";
 import { useComponentSize } from "@/hooks/use-component-size";
-import { useMemo, useState, useEffect } from "react";
-import { Description } from "./card/description";
-import { ANIMATION_CONFIG } from "./constants";
-import { SkeletonCard } from "./card/skeleton";
+import { NAV_ANIMATION_CONFIG } from "@/config/constants";
+import { NavCardSkeleton } from "../shared/skeletons";
+import { Description, Title, Icon } from "./elements";
+import SearchAction from "./actions/search-action";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Title } from "./card/title";
-import { Icon } from "./card/icon";
-import dynamic from "next/dynamic";
-import SearchAction from "./card/actions/search-action";
-import CountdownAction from "./card/actions/countdown-action";
+import PollAction from "./actions/poll-action";
 
-function CardComponent({
-  link,
+export default function Card({
+  onActionHeightChange,
+  isStackHovered,
+  loadingServers,
+  onMouseEnter,
+  onMouseLeave,
   position,
   expanded,
   onClick,
   isTop,
-  onActionHeightChange,
-  onMouseEnter,
-  onMouseLeave,
+  link,
+  playerCount,
+  isActive,
 }) {
-  const { offsetY: expandedOffsetY } = ANIMATION_CONFIG.expanded;
+  const { offsetY: expandedOffsetY } = NAV_ANIMATION_CONFIG.expanded;
   const { offsetY: collapsedOffsetY, scale: collapsedScale } =
-    ANIMATION_CONFIG.collapsed;
+    NAV_ANIMATION_CONFIG.collapsed;
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
+  const [isIndividualHovered, setIsIndividualHovered] = useState(false);
   const [actionRef, actionSize] = useComponentSize();
-  const isCountdownActive = false;
 
   const ActionComponent = isTop ? (
-    isCountdownActive ? (
-      <CountdownAction />
-    ) : (
-      <SearchAction />
-    )
+    <>
+      <SearchAction placeholder={"search in streamers"} />
+      <PollAction />
+    </>
   ) : null;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isTop && onActionHeightChange) {
-      onActionHeightChange(actionSize.height);
+      if (ActionComponent && actionSize.height > 0) {
+        requestAnimationFrame(() => onActionHeightChange(actionSize.height));
+      }
     }
-  }, [actionSize.height, isTop, onActionHeightChange]);
+  }, [isTop, ActionComponent, actionSize.height, onActionHeightChange]);
 
-  if (link.skeleton) {
+  if (loadingServers) {
     return (
       <motion.div
         exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
         className="absolute left-1/2 -translate-x-1/2 w-full"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{
-          zIndex: ANIMATION_CONFIG.expanded.scale - position,
+          zIndex: NAV_ANIMATION_CONFIG.expanded.scale - position,
           scale: Math.pow(collapsedScale, position),
           y: position * collapsedOffsetY,
           opacity: 1,
         }}
       >
-        <SkeletonCard />
+        <NavCardSkeleton />
       </motion.div>
     );
   }
 
   return (
     <motion.div
-      className="absolute left-1/2 -translate-x-1/2 w-full h-auto cursor-pointer rounded-[30px] bg-white/80 dark:bg-black/40 backdrop-blur-lg border-2 border-black/10 dark:border-white/10 p-3 transform-gpu will-change-transform"
+      className={`absolute left-1/2 -translate-x-1/2 w-full h-auto cursor-pointer rounded-primary bg-white/80 dark:bg-black/40 backdrop-blur-lg border p-3 transition-colors duration-200 ease-linear transform-gpu will-change-transform ${
+        expanded
+          ? isIndividualHovered
+            ? "border-primary"
+            : "border-base/10"
+          : isStackHovered
+          ? "border-primary"
+          : "border-base/10"
+      }`}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{
         opacity: 1,
         y: expanded ? position * expandedOffsetY : position * collapsedOffsetY,
         scale: expanded ? 1 : Math.pow(collapsedScale, position),
-        zIndex: ANIMATION_CONFIG.expanded.scale - position,
+        zIndex: NAV_ANIMATION_CONFIG.expanded.scale - position,
       }}
       exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
       transition={{
         y: {
-          ...ANIMATION_CONFIG.transition,
+          ...NAV_ANIMATION_CONFIG.transition,
           delay: expanded ? position * 0.04 : 0,
         },
         scale: {
-          ...ANIMATION_CONFIG.transition,
+          ...NAV_ANIMATION_CONFIG.transition,
           delay: expanded ? position * 0.02 : 0,
         },
       }}
       onClick={onClick}
       onMouseEnter={() => {
+        setIsIndividualHovered(true);
         setIsHovered(true);
         onMouseEnter?.();
       }}
       onMouseLeave={() => {
+        setIsIndividualHovered(false);
         setIsHovered(false);
         onMouseLeave?.();
       }}
       layout
     >
       <div className="flex items-center h-auto gap-3">
-        <Icon icon={link.logo} />
-        <div className="flex-1 flex flex-col -space-y-1 overflow-hidden">
-          <Title text={link.name} />
+        <Icon icon={link.icon} isActive={isActive} />
+        <div className="flex-1 flex flex-col -gap-1 overflow-hidden">
+          <Title text={link.name} isActive={isActive} />
           <Description
             text={
               isHovered && !expanded
-                ? "click to see the servers"
-                : link.description
+                ? "Click to select server"
+                : `${link.playerCount} aktif oyuncu`
             }
+            isActive={isActive}
           />
         </div>
       </div>
-      {ActionComponent && (
-        <div ref={actionRef} className="mt-2.5">
-          {ActionComponent}
-        </div>
-      )}
+      {ActionComponent && <div ref={actionRef}>{ActionComponent}</div>}
     </motion.div>
   );
 }
-
-const Card = dynamic(() => Promise.resolve(CardComponent), {
-  ssr: false,
-});
-
-export { Card };

@@ -1,5 +1,7 @@
 "use client";
 
+import { THEMES, VALID_THEMES, STORAGE_KEYS } from "@/config/constants";
+import { GET_STORAGE_ITEM, SET_STORAGE_ITEM } from "@/lib/utils";
 import {
   createContext,
   useCallback,
@@ -9,157 +11,113 @@ import {
   useMemo,
 } from "react";
 
-const STORAGE_KEY = "POVS_SETTINGS";
-const DEFAULT_SETTINGS = {
-  theme: "system",
-  largeStreamerCard: false,
-  favorites: [],
-};
+const SettingsContext = createContext(undefined);
 
-const initialSettings = {
-  ...DEFAULT_SETTINGS,
+const DEFAULT_SETTINGS = {
+  theme: THEMES.SYSTEM,
+  largeStreamerCard: false,
 };
 
 const getStoredSettings = () => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const parsed = stored ? JSON.parse(stored) : {};
-    return { ...DEFAULT_SETTINGS, ...parsed };
-  } catch (error) {
-    console.error("Failed to parse stored settings:", error);
-    return initialSettings;
-  }
+  const stored = GET_STORAGE_ITEM(STORAGE_KEYS.SETTINGS);
+  return stored ? { ...DEFAULT_SETTINGS, ...stored } : DEFAULT_SETTINGS;
 };
 
 const saveSettings = (settings) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    return true;
-  } catch (error) {
-    console.error("Failed to save settings:", error);
-    return false;
-  }
+  return SET_STORAGE_ITEM(STORAGE_KEYS.SETTINGS, settings);
 };
 
-const SettingsContext = createContext(null);
+const applyThemePreference = (theme) => {
+  if (typeof window === "undefined") return;
+
+  let effectiveTheme = theme;
+
+  if (theme === THEMES.SYSTEM) {
+    effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? THEMES.DARK
+      : THEMES.LIGHT;
+  }
+
+  document.documentElement.className = effectiveTheme;
+};
 
 export function SettingsProvider({ children }) {
-  const [settings, setSettings] = useState(() => {
-    if (typeof window !== "undefined") {
-      return getStoredSettings();
-    }
-    return initialSettings;
-  });
-  const [isInitialized, setIsInitialized] = useState(
-    typeof window !== "undefined"
-  );
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      try {
-        const allKeys = Object.keys(localStorage);
-        allKeys.forEach((key) => {
-          if (key !== STORAGE_KEY) {
-            localStorage.removeItem(key);
-          }
-        });
-      } catch (error) {
-        console.error("Failed to clean up localStorage:", error);
-      }
+      setSettings(getStoredSettings());
+      setIsInitialized(true);
     }
   }, []);
 
   useEffect(() => {
-    if (!isInitialized) {
-      const storedSettings = getStoredSettings();
-      setSettings(storedSettings);
-      setIsInitialized(true);
-    }
-  }, [isInitialized]);
-
-  useEffect(() => {
     if (!isInitialized) return;
 
-    const applyTheme = (selectedTheme) => {
-      if (selectedTheme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
-        document.documentElement.className = systemTheme;
-      } else {
-        document.documentElement.className = selectedTheme;
-      }
-    };
+    applyThemePreference(settings.theme);
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleSystemThemeChange = (e) => {
-      if (settings.theme === "system") {
-        applyTheme("system");
+    const handleSystemThemeChange = () => {
+      if (settings.theme === THEMES.SYSTEM) {
+        applyThemePreference(THEMES.SYSTEM);
       }
     };
 
-    applyTheme(settings.theme);
     mediaQuery.addEventListener("change", handleSystemThemeChange);
-
     return () => {
       mediaQuery.removeEventListener("change", handleSystemThemeChange);
     };
   }, [settings.theme, isInitialized]);
 
-  const updateSettings = useCallback((key, value) => {
-    if (!key || typeof key !== "string") {
-      console.error("Invalid settings key:", key);
-      return false;
-    }
-
+  const updateSettings = useCallback((newSettings) => {
     setSettings((prev) => {
-      const newSettings = { ...prev, [key]: value };
-      saveSettings(newSettings);
-      return newSettings;
+      const updated = { ...prev, ...newSettings };
+      saveSettings(updated);
+      return updated;
     });
   }, []);
 
   const setTheme = useCallback(
     (newTheme) => {
-      if (!["light", "dark", "system"].includes(newTheme)) {
-        console.error("Invalid theme:", newTheme);
-        return false;
+      if (!VALID_THEMES.includes(newTheme)) {
+        console.error(`Invalid theme: ${newTheme}`);
+        return;
       }
-      return updateSettings("theme", newTheme);
+      updateSettings({ theme: newTheme });
     },
-    [updateSettings]
+    [updateSettings],
   );
 
-  const toggleFavorite = useCallback(
-    (streamerName) => {
-      if (!streamerName) return;
-      const lowerCaseName = streamerName.toLowerCase();
-      setSettings((prev) => {
-        const currentFavorites = prev.favorites || [];
-        const isFavorite = currentFavorites.includes(lowerCaseName);
-        const newFavorites = isFavorite
-          ? currentFavorites.filter((name) => name !== lowerCaseName)
-          : [...currentFavorites, lowerCaseName];
+  const toggleTheme = useCallback(() => {
+    const newTheme =
+      settings.theme === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK;
+    setTheme(newTheme);
+  }, [settings.theme, setTheme]);
 
-        const newSettings = { ...prev, favorites: newFavorites };
-        saveSettings(newSettings);
-        return newSettings;
-      });
-    },
-    [updateSettings]
-  );
+  const resetSettings = useCallback(() => {
+    setSettings(DEFAULT_SETTINGS);
+    saveSettings(DEFAULT_SETTINGS);
+  }, []);
 
   const contextValue = useMemo(
     () => ({
-      settings,
-      updateSettings,
       theme: settings.theme,
-      setTheme,
-      toggleFavorite,
+      updateSettings,
       isInitialized,
+      resetSettings,
+      toggleTheme,
+      settings,
+      setTheme,
     }),
-    [settings, updateSettings, setTheme, toggleFavorite, isInitialized]
+    [
+      updateSettings,
+      resetSettings,
+      isInitialized,
+      toggleTheme,
+      settings,
+      setTheme,
+    ],
   );
 
   return (
@@ -169,10 +127,10 @@ export function SettingsProvider({ children }) {
   );
 }
 
-export const useSettings = () => {
+export function useSettings() {
   const context = useContext(SettingsContext);
-  if (!context) {
-    throw new Error("useSettings must be used within SettingsProvider");
+  if (context === undefined) {
+    throw new Error("useSettings must be used within a SettingsProvider");
   }
   return context;
-};
+}

@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { apiService } from "@/services/apiService";
+import { apiService } from "@/services/firebase.service";
 
 const NavigationContext = createContext(null);
 export { NavigationContext };
@@ -9,14 +9,18 @@ async function fetchPlayerCount(serverCode) {
   if (!serverCode) return null;
   try {
     const response = await fetch(
-      `https://servers-frontend.fivem.net/api/servers/single/${serverCode}`
+      `https://servers-frontend.fivem.net/api/servers/single/${serverCode}`,
+      { next: { revalidate: 60 } }
     );
-    if (!response.ok) return 0;
+    if (!response.ok) {
+      console.error(`Server not found: ${serverCode}`);
+      return 0;
+    }
     const data = await response.json();
     return data?.Data?.clients ?? data?.clients ?? 0;
   } catch (error) {
-    console.error(`Oyuncu sayısı alınırken hata (${serverCode}):`, error);
-    return null;
+    console.error(`Error fetching player count (${serverCode}):`, error);
+    return 0;
   }
 }
 
@@ -94,6 +98,13 @@ export function NavigationProvider({ children }) {
     }
   }, [activeServerCode]);
 
+  const selectServer = (serverCode) => {
+    setActiveServerCode(serverCode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("selectedServerCode", serverCode);
+    }
+  };
+
   return (
     <NavigationContext.Provider
       value={{
@@ -108,6 +119,7 @@ export function NavigationProvider({ children }) {
         setActiveServerCode,
         loadingServers,
         playerCounts,
+        selectServer,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { discordService } from "@/services/discordService";
+import { discordService } from "@/services/discord.service";
 
 const GALLERY_CHANNEL_ID = "1068562697744035860";
 const TWITTER_CHANNEL_ID = "1098858378727526460";

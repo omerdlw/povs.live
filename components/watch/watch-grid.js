@@ -38,7 +38,7 @@ export default function WatchGrid({ streamers }) {
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
         <button
           onClick={() => router.back()}
-          className="size-14 center cursor-pointer rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-md border border-black/10 dark:border-white/10 transition-colors"
+          className="size-14 center cursor-pointer rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-md border border-base/10 transition-colors"
         >
           <Icon icon="solar:rewind-back-circle-bold" size={28} />
         </button>

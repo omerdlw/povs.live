@@ -14,7 +14,7 @@ function StreamerStat({ noRightBorder, icon, text, isGame }) {
     <div
       className={classNames(
         "flex items-center space-x-1.5 h-full w-full flex-auto text-black/75 dark:text-white/75",
-        { "border-r border-black/5 dark:border-white/5": !noRightBorder }
+        { "border-r border-black/5 dark:border-white/5": !noRightBorder },
       )}
     >
       {icon && (
@@ -39,7 +39,7 @@ function StreamerStat({ noRightBorder, icon, text, isGame }) {
 export default function StreamerStats({ streamer }) {
   if (!streamer || !streamer.live) {
     return (
-      <div className="flex items-center flex-auto flex-nowrap w-full h-12 bg-black/5 dark:bg-white/5 rounded-[20px] overflow-hidden">
+      <div className="flex items-center flex-auto flex-nowrap w-full h-12 bg-base/5 rounded-secondary overflow-hidden">
         <StreamerStat
           icon={{ name: "solar:users-group-rounded-bold" }}
           text={`${FORMAT_NUMBER(streamer?.followers || 0)} takipçi`}
@@ -58,7 +58,7 @@ export default function StreamerStats({ streamer }) {
   }
 
   return (
-    <div className="flex items-center flex-auto flex-nowrap w-full h-12 bg-black/5 dark:bg-white/5 rounded-[20px] overflow-hidden">
+    <div className="flex items-center flex-auto flex-nowrap w-full h-12 bg-base/5 rounded-secondary overflow-hidden">
       <StreamerStat
         isGame
         icon={{ name: "solar:gamepad-bold" }}

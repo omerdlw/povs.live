@@ -1,1 +1,1 @@
-export const youtubers = ["@phriksos3", "@Nyrossedit", "@W1RCN2"];
+export const youtubers = [{ channelId: "UCM1Z4XHfmpd1FyyheCGYlQA" }];

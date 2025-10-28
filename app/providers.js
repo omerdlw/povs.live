@@ -3,6 +3,7 @@ import { SettingsProvider } from "@/contexts/settings-context";
 import { StreamerProvider } from "@/contexts/streamer-context";
 import { ModalProvider } from "@/contexts/modal-context";
 import { WatchProvider } from "@/contexts/watch-context";
+import React from "react";
 
 const providers = [
   SettingsProvider,

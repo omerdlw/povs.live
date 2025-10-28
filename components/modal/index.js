@@ -3,8 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useModal } from "@/contexts/modal-context";
 import { MODAL_COMPONENTS } from "./modals";
-import { useEffect } from "react";
 import classNames from "classnames";
+import { useEffect } from "react";
 
 const positionClasses = {
   center: "items-center justify-center",
@@ -99,7 +99,7 @@ const Modal = () => {
             className={classNames(
               "relative z-10 bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-black/15 dark:border-white/15",
               {
-                "rounded-[30px]": !isSideModal,
+                "rounded-primary": !isSideModal,
                 "h-screen": isSideModal,
                 "border-y-0 border-l-0": position === "left",
                 "border-y-0 border-r-0": position === "right",

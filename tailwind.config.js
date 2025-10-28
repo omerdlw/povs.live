@@ -1,18 +1,22 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  darkMode: "class", // veya 'media' veya false
-  mode: "jit",
+import typography from "@tailwindcss/typography";
+
+export default {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./modal/**/*.{js,ts,jsx,tsx,mdx}",
-    // Projenizin yapısına göre stil kullandığınız başka ana klasörler varsa
-    // onları da buraya ekleyebilirsiniz. Örneğin:
-    // "./contexts/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        base: 'var(--color-base)',
+        primary: 'var(--color-primary)',
+        success: 'var(--color-success)',
+        error: 'var(--color-error)',
+        warning: 'var(--color-warning)',
+        info: 'var(--color-info)',
+      },
+    },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [typography],
 };

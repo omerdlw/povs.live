@@ -1,9 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { streamerService } from "@/services/streamerService";
+import { streamerService } from "@/services/api.service";
 import { useNavigationContext } from "./navigation-context";
-import { apiService } from "@/services/apiService";
+import { apiService } from "@/services/firebase.service";
 
 const StreamerContext = createContext(null);
 
@@ -13,6 +13,13 @@ export function StreamerProvider({ children }) {
   const [streamersData, setStreamersData] = useState({});
   const [loadingStreamers, setLoadingStreamers] = useState(true);
   const [serverDetails, setServerDetails] = useState(null);
+  const [favoriteStreamers, setFavoriteStreamers] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('favoriteStreamers');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
 
   useEffect(() => {
     async function fetchServerData() {
@@ -40,9 +47,10 @@ export function StreamerProvider({ children }) {
         setServerDetails(details);
         const kickUsernames =
           details?.STREAMERS?.filter(
-            (username) => typeof username === "string" && username.trim() !== ""
+            (username) =>
+              typeof username === "string" && username.trim() !== "",
           ) || [];
-        setStreamerUsernames(kickUsernames); // Bu, aşağıdaki useEffect'i tetikleyecek
+        setStreamerUsernames(kickUsernames);
 
         if (kickUsernames.length === 0) {
           setLoadingStreamers(false);
@@ -50,11 +58,11 @@ export function StreamerProvider({ children }) {
       } catch (error) {
         console.error(
           `StreamerContext: Sunucu detayları alınırken hata (${serverNameToFetch}):`,
-          error
+          error,
         );
         setStreamerUsernames([]);
         setServerDetails(null);
-        setLoadingStreamers(false); // Hata durumunda yüklemeyi bitir
+        setLoadingStreamers(false);
       }
     }
 
@@ -70,19 +78,18 @@ export function StreamerProvider({ children }) {
   useEffect(() => {
     async function fetchStreamerDetails() {
       if (streamerUsernames.length === 0) {
-        setStreamersData({}); // Veriyi temizle
+        setStreamersData({});
         return;
       }
 
       try {
-        const data = await streamerService.getMultipleStreamersInfo(
-          streamerUsernames
-        );
+        const data =
+          await streamerService.getMultipleStreamersInfo(streamerUsernames);
         setStreamersData(data || {});
       } catch (error) {
         console.error(
           "StreamerContext: Yayıncı detayları alınırken hata:",
-          error
+          error,
         );
         setStreamersData({});
       } finally {
@@ -92,14 +99,26 @@ export function StreamerProvider({ children }) {
 
     if (streamerUsernames.length > 0) {
       fetchStreamerDetails();
-    } else {
     }
-  }, [streamerUsernames]); // Bağımlılık sadece streamerUsernames olmalı
+  }, [streamerUsernames]);
+
+  const toggleFavorite = (streamerUsername) => {
+    setFavoriteStreamers(prev => {
+      const newFavorites = prev.includes(streamerUsername)
+        ? prev.filter(username => username !== streamerUsername)
+        : [...prev, streamerUsername];
+      
+      localStorage.setItem('favoriteStreamers', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
 
   const value = {
     streamersData,
     loadingStreamers,
     serverDetails,
+    favoriteStreamers,
+    toggleFavorite,
   };
 
   return (

@@ -1,11 +1,12 @@
 "use client";
 
-import { useNavigation } from "../../hooks/use-navigation";
+import { MotionConfig, motion, AnimatePresence } from "framer-motion";
+import { useNavigation } from "@/hooks/use-navigation";
+import { NAV_ANIMATION_CONFIG } from "@/config/constants";
 import { useState } from "react";
 import classNames from "classnames";
-import { Card } from "./card";
-import { MotionConfig, motion, AnimatePresence } from "framer-motion";
-import { ANIMATION_CONFIG } from "./constants";
+import Card from "./card";
+import { useNavigationContext } from "@/contexts/navigation-context";
 
 export default function Nav() {
   const {
@@ -16,8 +17,11 @@ export default function Nav() {
     navigationItems,
     activeItemHasAction,
     setIsHovered,
+    playerCounts,
+    activeServerCode,
   } = useNavigation();
 
+  const { loadingServers } = useNavigationContext();
   const [actionHeight, setActionHeight] = useState(0);
   const baseCardHeight = 75;
 
@@ -27,7 +31,7 @@ export default function Nav() {
       : baseCardHeight;
 
   return (
-    <MotionConfig transition={ANIMATION_CONFIG.transition}>
+    <MotionConfig transition={NAV_ANIMATION_CONFIG.transition}>
       <AnimatePresence>
         {expanded && (
           <motion.div
@@ -63,6 +67,7 @@ export default function Nav() {
 
               return (
                 <Card
+                  loadingServers={loadingServers}
                   onClick={() =>
                     !item.skeleton &&
                     (expanded
@@ -77,6 +82,10 @@ export default function Nav() {
                   key={item.code || `skeleton-${i}`}
                   isTop={isTop}
                   link={item}
+                  playerCount={
+                    !item.skeleton ? playerCounts[item.code] : undefined
+                  }
+                  isActive={!item.skeleton && item.code === activeServerCode}
                 />
               );
             })}

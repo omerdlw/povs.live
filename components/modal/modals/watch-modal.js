@@ -4,9 +4,9 @@ import { useStreamer } from "@/contexts/streamer-context";
 import { useModal } from "@/contexts/modal-context";
 import { useWatch } from "@/contexts/watch-context";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import Title from "../title";
 import Icon from "@/components/icon";
+import { CN } from "@/lib/utils";
+import Title from "../title";
 
 export default function WatchModal() {
   const { streamersData, loadingStreamers } = useStreamer();
@@ -39,15 +39,13 @@ export default function WatchModal() {
 
   if (liveStreamers.length === 0) {
     return (
-      <div className="p-4 flex flex-col items-center justify-center min-h-[300px]">
-        <h2 className="text-xl font-bold text-white mb-2">
-          Aktif Yayıncı Bulunamadı
-        </h2>
-        <p className="text-gray-400 text-sm text-center">
-          Şu anda yayında olan yayıncı bulunmuyor. Lütfen daha sonra tekrar
-          deneyin.
-        </p>
-      </div>
+      <>
+        <Title title="Aktif Yayıncı Bulunamadı" />
+        <div className="p-5">
+          Şu anda yayında olan yayıncı bulunmuyor, lütfen daha sonra tekrar
+          deneyin
+        </div>
+      </>
     );
   }
 
@@ -75,8 +73,8 @@ export default function WatchModal() {
                 }
               }}
               disabled={isDisabled}
-              className={cn(
-                "p-4 bg-black/5 dark:bg-white/5 cursor-pointer rounded-[20px] border transition-all duration-200",
+              className={CN(
+                "p-4 bg-base/5 cursor-pointer rounded-secondary border transition-all duration-200",
                 "flex items-center space-x-3",
                 isSelected
                   ? "border-purple-700 dark:border-purple-500"
@@ -115,7 +113,7 @@ export default function WatchModal() {
           );
         })}
       </div>
-      <div className="flex items-center justify-end p-4 border-t border-black/10 dark:border-white/10">
+      <div className="flex items-center justify-end p-4 border-t border-base/10">
         <button
           onClick={() => {
             if (selectedStreamers.length === 0) return;
@@ -124,11 +122,11 @@ export default function WatchModal() {
             closeModal();
           }}
           disabled={selectedStreamers.length === 0}
-          className={cn(
-            "w-full p-4 rounded-[20px] cursor-pointer font-medium transition-colors",
+          className={CN(
+            "w-full p-4 rounded-secondary cursor-pointer font-medium transition-colors",
             selectedStreamers.length === 0
               ? "bg-black/10 dark:bg-white/10 cursor-not-allowed"
-              : "bg-purple-700 dark:bg-purple-500 text-white"
+              : "bg-primary text-white"
           )}
         >
           İzle ({selectedStreamers.length})

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Title from "../title";
 import Icon from "@/components/icon";
+import Title from "../title";
+import { ErrorMessage } from "@/components/shared";
 
 export default function GalleryModal({ close, data }) {
   const { apiEndpoint, modalTitle } = data;
@@ -45,7 +46,10 @@ export default function GalleryModal({ close, data }) {
 
   return (
     <div className="w-[600px] h-full flex flex-col">
-      <Title title={modalTitle || "Akış"} />
+      <Title
+        title={modalTitle || "Akış"}
+        description={"Akışı görüntülemek için VPN'e bağlanmanız gerekmekte"}
+      />
       <div className="flex-1 overflow-y-auto space-y-4">
         {loading && (
           <div className="w-full h-full center">
@@ -54,11 +58,7 @@ export default function GalleryModal({ close, data }) {
             </div>
           </div>
         )}
-        {error && (
-          <div className="w-full h-full center">
-            <p className="text-red-500 dark:text-red-400">Hata: {error}</p>
-          </div>
-        )}
+        {error && <ErrorMessage className="w-auto m-4" message={error} />}
         {!loading && !error && filteredData.length === 0 && (
           <div className="w-full h-full center">
             <p className="opacity-70">Gösterilecek içerik bulunamadı.</p>
@@ -67,10 +67,7 @@ export default function GalleryModal({ close, data }) {
         {!loading &&
           !error &&
           filteredData.map((item, index) => (
-            <div
-              key={index}
-              className="w-full  border-b border-black/10 dark:border-white/10 p-4"
-            >
+            <div key={index} className="w-full  border-b border-base/10 p-4">
               {item.images?.map((imgUrl, i) => (
                 <img
                   key={i}

@@ -1,63 +1,59 @@
-"use client";
-
+import Icon from "@/components/icon";
 import { useSettings } from "@/contexts/settings-context";
-import Title from "../title";
-import { cn } from "@/lib/utils";
+import { CN } from "@/lib/utils";
+
+const THEME_OPTIONS = [
+  { value: "light", icon: <Icon icon={"solar:sun-2-bold"} /> },
+  { value: "dark", icon: <Icon icon={"solar:moon-bold"} /> },
+  {
+    value: "system",
+    icon: <Icon icon={"solar:screencast-2-bold"} />,
+  },
+];
 
 export default function SettingsModal() {
   const { theme, setTheme, settings, updateSettings } = useSettings();
 
-  const themeOptions = [
-    { id: "light", label: "Açık" },
-    { id: "dark", label: "Koyu" },
-    { id: "system", label: "Sistem" },
-  ];
-
   return (
-    <>
-      <Title
-        title="Ayarlar"
-        description="Sistem ayarlarını buradan yönetebilirsiniz"
-      />
-      <div className="p-4 space-y-6">
-        <div>
-          <h3 className="text-sm font-semibold mb-3">Tema Seçenekleri</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {themeOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => setTheme(option.id)}
-                className={cn(
-                  "p-4 rounded-[20px] font-medium transition-colors cursor-pointer",
-                  theme === option.id
-                    ? "bg-purple-700 dark:bg-purple-500 text-white"
-                    : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-semibold mb-3">Yayıncı Kartı Boyutu</h3>
+    <div className="w-full flex flex-col gap-3 p-3">
+      <div className="w-full flex items-center gap-4">
+        {THEME_OPTIONS.map(({ value, label, icon }) => (
           <button
-            onClick={() =>
-              updateSettings("largeStreamerCard", !settings.largeStreamerCard)
-            }
-            className={cn(
-              "w-full p-4 rounded-[20px] text-left font-medium transition-colors cursor-pointer",
-              settings.largeStreamerCard
-                ? "bg-purple-700 dark:bg-purple-500 text-white"
-                : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"
+            className={CN(
+              "py-5 px-8 rounded-secondary bg-base/5 hover:bg-transparent border border-transparent hover:border-black/10 dark:hover:border-white/10 cursor-pointer transition",
+              theme === value && "bg-primary hover:bg-primary"
             )}
+            onClick={() => setTheme(value)}
+            aria-pressed={theme === value}
+            type="button"
+            key={value}
           >
-            Büyük Yayıncı Kartı{" "}
-            {settings.largeStreamerCard ? "(Açık)" : "(Kapalı)"}
+            {icon}
           </button>
-        </div>
+        ))}
       </div>
-    </>
+
+      <div className="flex items-center justify-between p-5 bg-base/5 rounded-secondary">
+        <span className="text-sm font-medium">Büyük Yayıncı Kartı</span>
+        <button
+          onClick={() =>
+            updateSettings({ largeStreamerCard: !settings.largeStreamerCard })
+          }
+          className={CN(
+            "w-12 h-6 cursor-pointer rounded-full transition-colors relative",
+            settings.largeStreamerCard ? "bg-primary" : "bg-base/10"
+          )}
+        >
+          <span
+            className={CN(
+              "block w-5 h-5 bg-white rounded-full transition-transform",
+              settings.largeStreamerCard
+                ? "translate-x-[26px]"
+                : "translate-x-0.5"
+            )}
+          />
+        </button>
+      </div>
+    </div>
   );
 }

@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
 import { youtubers } from "@/data/youtubers";
 
-// Sayıları (Abone, Görüntülenme) K/M formatına çevirir
+const BASE_URL = "https://www.googleapis.com/youtube/v3";
+
 function formatNumber(num) {
   if (!num) return "0";
   const number = parseInt(num, 10);
-  if (number >= 1000000)
-    return (number / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-  if (number >= 1000)
-    return (number / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+  if (Number.isNaN(number)) return "0";
+  if (number >= 1_000_000)
+    return (number / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (number >= 1_000)
+    return (number / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
   return number.toLocaleString("tr-TR");
 }
 
-// Tarihi "X zaman önce" formatına çevirir
 function formatPublishedAt(dateString) {
   try {
     const date = new Date(dateString);
@@ -20,148 +21,237 @@ function formatPublishedAt(dateString) {
     const diffMs = now - date;
     if (diffMs < 0) return "şimdi";
 
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-    const diffMonths = Math.floor(diffDays / 30.44);
-    const diffYears = Math.floor(diffDays / 365.25);
+    const sec = Math.floor(diffMs / 1000);
+    const min = Math.floor(sec / 60);
+    const hour = Math.floor(min / 60);
+    const day = Math.floor(hour / 24);
+    const month = Math.floor(day / 30.44);
+    const year = Math.floor(day / 365.25);
 
-    if (diffYears >= 1) return `${diffYears} yıl önce`;
-    if (diffMonths >= 1) return `${diffMonths} ay önce`;
-    if (diffDays >= 1) return `${diffDays} gün önce`;
-    if (diffHours >= 1) return `${diffHours} saat önce`;
-    if (diffMinutes >= 1) return `${diffMinutes} dakika önce`;
+    if (year >= 1) return `${year} yıl önce`;
+    if (month >= 1) return `${month} ay önce`;
+    if (day >= 1) return `${day} gün önce`;
+    if (hour >= 1) return `${hour} saat önce`;
+    if (min >= 1) return `${min} dakika önce`;
     return "az önce";
-  } catch (e) {
+  } catch {
     return "bilinmiyor";
   }
 }
 
-async function getYouTubeChannelData(channelHandle) {
-  const API_KEY = process.env.GOOGLE_API_KEY;
-  const BASE_URL = "https://www.googleapis.com/youtube/v3";
-  let channelId = "";
-  let channelTitle = channelHandle;
-  let channelAvatar = "https://via.placeholder.com/88?text=?";
+function safeThumbnail(snippet) {
+  return (
+    snippet?.thumbnails?.high?.url ||
+    snippet?.thumbnails?.medium?.url ||
+    snippet?.thumbnails?.default?.url ||
+    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRjMzRjRGNCIvPgo8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OTk5OSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2Ij5ZT1VUUUJFPC90ZXh0Pgo8L3N2Zz4K"
+  );
+}
+
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+  }
+  return res.json();
+}
+
+async function resolveChannelIdByHandle(handle, apiKey) {
+  const clean = (handle || "").replace(/^@/, "").trim();
+  if (!clean) throw new Error("Geçersiz handle");
+
+  // 1) Önce search API ile dene (daha güvenilir)
+  try {
+    const searchUrl = `${BASE_URL}/search?part=snippet&q=${encodeURIComponent(clean)}&type=channel&maxResults=5&key=${apiKey}`;
+    const search = await fetchJSON(searchUrl);
+
+    if (search?.items?.length > 0) {
+      // Exact match ara
+      for (const item of search.items) {
+        const channelTitle = item.snippet?.title?.toLowerCase() || "";
+        const customUrl = item.snippet?.customUrl?.toLowerCase() || "";
+
+        // Handle veya kanal adı eşleşmesi
+        if (
+          customUrl === clean.toLowerCase() ||
+          channelTitle === clean.toLowerCase() ||
+          customUrl.includes(clean.toLowerCase())
+        ) {
+          return item.snippet.channelId;
+        }
+      }
+
+      // Exact match yoksa ilk sonucu al
+      return search.items[0].snippet.channelId;
+    }
+  } catch (err) {
+    console.warn(`Search API failed for ${handle}:`, err.message);
+  }
+
+  // 2) forHandle API'yi dene (yedek)
+  try {
+    const data = await fetchJSON(
+      `${BASE_URL}/channels?part=id&forHandle=${encodeURIComponent(clean)}&key=${apiKey}`,
+    );
+    const id = data?.items?.[0]?.id;
+    if (id) return id;
+  } catch (err) {
+    console.warn(`forHandle API failed for ${handle}:`, err.message);
+  }
+
+  throw new Error(`Kanal bulunamadı: ${handle}`);
+}
+
+async function getChannelCore(channelId, apiKey) {
+  const data = await fetchJSON(
+    `${BASE_URL}/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`,
+  );
+  const info = data?.items?.[0];
+  if (!info) throw new Error("Kanal bulunamadı");
+
+  const title = info.snippet?.title || "Bilinmiyor";
+  const avatar =
+    info.snippet?.thumbnails?.high?.url ||
+    info.snippet?.thumbnails?.medium?.url ||
+    info.snippet?.thumbnails?.default?.url ||
+    "https://via.placeholder.com/88?text=?";
+  const subs = formatNumber(info.statistics?.subscriberCount);
+
+  return { title, avatar, subs };
+}
+
+async function getLastVideos(channelId, apiKey, maxResults = 3) {
+  // Son videoların ID'leri
+  const list = await fetchJSON(
+    `${BASE_URL}/search?part=snippet&channelId=${channelId}&order=date&maxResults=${maxResults}&type=video&key=${apiKey}`,
+  );
+  const items = list?.items || [];
+  if (items.length === 0) return [];
+
+  const ids = items
+    .map((it) => it.id?.videoId)
+    .filter(Boolean)
+    .join(",");
+  if (!ids) return [];
+
+  // Video istatistikleri
+  const stats = await fetchJSON(
+    `${BASE_URL}/videos?part=snippet,statistics&id=${ids}&key=${apiKey}`,
+  );
+  const videos = (stats?.items || []).map((v) => ({
+    title: v.snippet?.title || "Video",
+    url: `https://www.youtube.com/watch?v=${v.id}`,
+    thumbnail: safeThumbnail(v.snippet),
+    views: formatNumber(v.statistics?.viewCount),
+    publishedAt: formatPublishedAt(v.snippet?.publishedAt),
+  }));
+
+  return videos;
+}
+
+async function buildCreatorRecord(entry, apiKey) {
+  const handle = typeof entry === "string" ? entry : entry?.handle;
+  const presetChannelId = typeof entry === "object" ? entry?.channelId : null;
+
+  let channelId = presetChannelId || "";
+  let channelTitle = handle || "Kanal";
+  let channelAvatar =
+    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHZpZXdCb3g9IjAgMCA4OCA4OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijg4IiBoZWlnaHQ9Ijg4IiByeD0iNDQiIGZpbGw9IiNGM0Y0RjYiLz4KPHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTk5OTkiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCI+Pz88L3RleHQ+Cjwvc3ZnPgo=";
   let subscriberCount = "0";
   let videos = [];
 
   try {
-    // 1. Kanal Handle'ından Kanal ID'sini Bul
-    const searchResponse = await fetch(
-      `${BASE_URL}/search?part=snippet&q=${encodeURIComponent(
-        channelHandle
-      )}&type=channel&key=${API_KEY}`
-    );
-    if (!searchResponse.ok) throw new Error("Channel search failed");
-
-    const searchData = await searchResponse.json();
-    if (!searchData.items || searchData.items.length === 0) {
-      throw new Error(`Channel not found for ${channelHandle}`);
+    if (!channelId) {
+      channelId = await resolveChannelIdByHandle(handle, apiKey);
     }
-    channelId = searchData.items[0].snippet.channelId;
+    const core = await getChannelCore(channelId, apiKey);
+    channelTitle = core.title;
+    channelAvatar = core.avatar;
+    subscriberCount = core.subs;
 
-    // 2. Kanal Bilgilerini ve Abone Sayısını Çek
-    const channelResponse = await fetch(
-      `${BASE_URL}/channels?part=snippet,statistics&id=${channelId}&key=${API_KEY}`
-    );
-    if (!channelResponse.ok) throw new Error("Failed to fetch channel stats");
+    videos = await getLastVideos(channelId, apiKey, 3);
 
-    const channelData = await channelResponse.json();
-    if (channelData.items && channelData.items.length > 0) {
-      const info = channelData.items[0];
-      channelTitle = info.snippet.title;
-      channelAvatar = info.snippet.thumbnails.default.url;
-      subscriberCount = formatNumber(info.statistics.subscriberCount);
-    }
-
-    // 3. Kanalın Son 3 Videosunun ID'lerini Çek
-    const videosResponse = await fetch(
-      `${BASE_URL}/search?part=snippet&channelId=${channelId}&order=date&maxResults=3&type=video&key=${API_KEY}`
-    );
-    if (!videosResponse.ok) throw new Error("Failed to fetch video list");
-
-    const videosData = await videosResponse.json();
-    if (videosData.items && videosData.items.length > 0) {
-      const videoIds = videosData.items
-        .map((item) => item.id.videoId)
-        .join(",");
-
-      // 4. (GÜNCELLEME) Video ID'leri ile Görüntülenme Sayılarını Çek
-      const statsResponse = await fetch(
-        `${BASE_URL}/videos?part=snippet,statistics&id=${videoIds}&key=${API_KEY}`
-      );
-      if (!statsResponse.ok) throw new Error("Failed to fetch video stats");
-
-      const statsData = await statsResponse.json();
-
-      // 5. Videoları İstatistiklerle Birlikte Eşle
-      videos = statsData.items.map((video) => ({
-        title: video.snippet.title,
-        url: `https://www.youtube.com/watch?v=${video.id}`,
-        thumbnail: video.snippet.thumbnails.medium.url,
-        views: formatNumber(video.statistics.viewCount), // "N/A" yerine gerçek veri
-        publishedAt: formatPublishedAt(video.snippet.publishedAt),
-      }));
-    }
-  } catch (error) {
-    console.error(`Error fetching data for ${channelHandle}: ${error.message}`);
-    // Hata durumunda bile temel bilgileri döndürmeye çalış
     return {
-      id: channelHandle,
+      id: handle || channelId,
       channelName: channelTitle,
-      channelUrl: `https://www.youtube.com/${channelHandle}`,
-      channelAvatar: channelAvatar,
-      subscriberCount: subscriberCount,
-      videos: videos, // Hata oluştuysa 'videos' boş bir dizi olabilir
+      channelUrl: `https://www.youtube.com/channel/${channelId}`,
+      channelAvatar,
+      subscriberCount,
+      videos,
+    };
+  } catch (err) {
+    // Hata olsa bile, temel verileri döndür
+    return {
+      id: handle || channelId || "unknown",
+      channelName: channelTitle,
+      channelUrl: channelId
+        ? `https://www.youtube.com/channel/${channelId}`
+        : handle
+          ? `https://www.youtube.com/${handle.replace(/^@/, "")}`
+          : "https://www.youtube.com",
+      channelAvatar,
+      subscriberCount,
+      videos,
+      error: err.message,
     };
   }
-
-  return {
-    id: channelHandle,
-    channelName: channelTitle,
-    channelUrl: `https://www.youtube.com/channel/${channelId}`,
-    channelAvatar: channelAvatar,
-    subscriberCount: subscriberCount,
-    videos: videos,
-  };
 }
 
-export async function GET(request) {
-  const API_KEY = process.env.GOOGLE_API_KEY;
+export async function GET(req) {
+  const API_KEY = "AIzaSyAzSsjbpBoMIuNui4NjU2OFNAY6ZzhfM_w";
 
   if (!API_KEY || API_KEY === "BURAYA_KENDI_API_ANAHTARINIZI_YAPISTIRIN") {
     return NextResponse.json(
       {
         error:
-          "GOOGLE_API_KEY ortam değişkeni ayarlanmadı. Lütfen .env.local dosyanızı kontrol edin.",
+          "GOOGLE_API_KEY ortam değişkeni ayarlanmadı. Lütfen .envf.local dosyasını kontrol edin.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
+  const { searchParams } = new URL(req.url);
+  const channelsParam = searchParams.get("channels");
+  let list = youtubers;
+
+  if (channelsParam) {
+    const parsed = channelsParam
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .map((h) => ({ handle: h }));
+    if (parsed.length > 0) list = parsed;
+  }
 
   try {
-    const results = await Promise.all(youtubers.map(getYouTubeChannelData));
+    const results = await Promise.all(
+      list.map((entry) => buildCreatorRecord(entry, API_KEY)),
+    );
     return NextResponse.json(results, {
       status: 200,
-      headers: corsHeaders,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error.message },
-      { status: 500, headers: corsHeaders }
+      { error: error.message || "Bilinmeyen hata" },
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      },
     );
   }
 }
 
-export async function OPTIONS(request) {
+export async function OPTIONS() {
   return new Response(null, {
     status: 204,
     headers: {

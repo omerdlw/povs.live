@@ -1,32 +1,50 @@
 "use client";
 
-import React, { createContext, useState, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useCallback,
+  useMemo,
+} from "react";
 import Modal from "@/components/modal";
 
 const ModalContext = createContext(null);
 
+const initialState = {
+  position: "center",
+  modalType: null,
+  isOpen: false,
+  props: {},
+};
+
 export const ModalProvider = ({ children }) => {
-  const [modalState, setModalState] = useState({
-    position: "center",
-    modalType: null,
-    isOpen: false,
-    props: {},
-  });
+  const [modalState, setModalState] = useState(initialState);
 
-  const openModal = (modalType, props = {}, position = "center") => {
-    setModalState({
-      isOpen: true,
-      modalType,
-      position,
-      props,
-    });
-  };
+  const openModal = useCallback(
+    (modalType, props = {}, position = "center") => {
+      setModalState({
+        isOpen: true,
+        modalType,
+        position,
+        props,
+      });
+    },
+    [],
+  );
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setModalState((prevState) => ({ ...prevState, isOpen: false }));
-  };
+  }, []);
 
-  const value = { ...modalState, openModal, closeModal };
+  const value = useMemo(
+    () => ({
+      ...modalState,
+      openModal,
+      closeModal,
+    }),
+    [modalState, openModal, closeModal],
+  );
 
   return (
     <ModalContext.Provider value={value}>

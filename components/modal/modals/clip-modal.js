@@ -1,9 +1,8 @@
 import { useState } from "react";
 import Title from "../title";
 import Icon from "@/components/icon";
-import { cn } from "@/lib/utils";
-import { CALCULATE_LASTSTREAM } from "@/lib/utils";
-import { streamerService } from "@/services/streamerService";
+import { CALCULATE_LASTSTREAM, CN } from "@/lib/utils";
+import { streamerService } from "@/services/api.service";
 
 export default function KickClipModal({ close }) {
   const [clipUrl, setClipUrl] = useState("");
@@ -122,13 +121,10 @@ export default function KickClipModal({ close }) {
 
   return (
     <>
-      <Title
-        title="Klip indirici"
-        description="Klip bağlantısını yapıştırarak klip hakkında bilgi alabilir ve indirebilirsiniz"
-      />
+      <Title description="Klip bağlantısını yapıştırarak klip hakkında bilgi alabilir ve indirebilirsiniz" />
       <div className="p-4 space-y-4">
         {error && (
-          <div className="bg-red-700 text-red-200 dark:bg-red-500 dark:text-red-100 font-semibold rounded-[20px] p-4 text-sm">
+          <div className="bg-error/70 text-error dark:bg-error/20 dark:text-error font-semibold rounded-secondary p-4 text-sm">
             {error}
           </div>
         )}
@@ -138,17 +134,15 @@ export default function KickClipModal({ close }) {
             value={clipUrl}
             onChange={(e) => setClipUrl(e.target.value)}
             placeholder="https://kick.com/STREAMER/clip/..."
-            className="bg-black/5 dark:bg-white/5 w-full rounded-[20px] p-4 h-14 resize-none focus:outline-none"
+            className="bg-base/5 w-full rounded-secondary p-4 h-14 resize-none focus:outline-none"
             disabled={loading}
           />
           <button
             onClick={handleFetchClip}
             disabled={loading}
-            className={cn(
-              "size-14 center shrink-0 cursor-pointer rounded-[20px] transition-colors",
-              loading
-                ? "bg-black/10 dark:bg-white/10"
-                : "bg-purple-700 dark:bg-purple-500 text-white"
+            className={CN(
+              "size-14 center shrink-0 cursor-pointer rounded-secondary transition-colors",
+              loading ? ":bg-base/10" : "bg-primary text-white"
             )}
           >
             {loading ? (
@@ -164,9 +158,9 @@ export default function KickClipModal({ close }) {
         </div>
         {clipInfo && (
           <div className="space-y-4">
-            <div className="flex space-x-4 rounded-[20px]">
+            <div className="flex space-x-4 rounded-secondary">
               <img
-                className="w-60 h-auto rounded-[20px] object-cover"
+                className="w-60 h-auto rounded-secondary object-cover"
                 src={clipInfo.thumbnailUrl}
                 alt="img"
               />
@@ -195,11 +189,11 @@ export default function KickClipModal({ close }) {
             <button
               onClick={handleDownload}
               disabled={isDownloading}
-              className={cn(
-                "w-full p-4 rounded-[20px] center space-x-2 cursor-pointer font-medium transition-colors",
+              className={CN(
+                "w-full p-4 rounded-secondary center space-x-2 cursor-pointer font-medium transition-colors",
                 isDownloading
                   ? "bg-black/10 dark:bg-white/10 cursor-not-allowed"
-                  : "bg-purple-700 dark:bg-purple-500 text-white"
+                  : "bg-primary text-white"
               )}
             >
               {isDownloading ? (
