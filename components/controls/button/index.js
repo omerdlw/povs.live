@@ -2,9 +2,10 @@ import Icon from "@/components/icon";
 import { CN } from "@/lib/utils";
 
 const BASE_STYLES =
-  "center cursor-pointer group rounded-secondary backdrop-blur-xl overflow-hidden bg-white/80 dark:bg-black/20 border border-base/10 hover:border-primary p-1 transition-colors duration-200 ease-linear";
+  "center cursor-pointer group rounded-3xl backdrop-blur-xl overflow-hidden bg-white/80 dark:bg-black/20 border border-base/10 hover:border-primary p-1 transition";
 
-const ICON_CONTAINER_BASE = "rounded-tertiary center bg-base/5 center";
+const ICON_CONTAINER_BASE =
+  "rounded-secondary w-full h-full center bg-base/5 center";
 
 const IconWrapper = ({ icon, color, className, loading }) => {
   if (icon?.startsWith("http")) {
@@ -51,7 +52,7 @@ export default function ControlsButton({
       ) : (
         <>
           <IconWrapper
-            className="w-[50px] center h-full shrink-0 group-hover:bg-bg-primary dark:group-hover:bg-secondary group-hover:text-white transition-colors duration-200 ease-linear"
+            className="w-[50px] center h-full shrink-0 group-hover:bg-primary dark:group-hover:bg-secondary group-hover:text-white transition"
             loading={loading}
             color={color}
             icon={icon}

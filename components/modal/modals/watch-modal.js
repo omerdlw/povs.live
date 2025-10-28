@@ -89,9 +89,7 @@ export default function WatchModal() {
               />
               <div className="flex-1 text-left">
                 <h3 className="font-semibold uppercase">{streamer.name}</h3>
-                <p className="text-sm text-purple-700 dark:text-purple-500">
-                  {streamer.viewers} izleyici
-                </p>
+                <p className="text-sm">{streamer.viewers} izleyici</p>
               </div>
               {isSelected && (
                 <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">

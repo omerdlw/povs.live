@@ -21,7 +21,7 @@ export default function Controls() {
       <div className="fixed bottom-4 left-4 z-40">
         <button
           onClick={() => openModal("SETTINGS_MODAL")}
-          className="size-10 center cursor-pointer backdrop-blur-lg rounded-full border border-base/10 hover:border-primary bg-white/60 dark:bg-black/40 transition-colors duration-200 ease-linear"
+          className="size-10 center cursor-pointer backdrop-blur-lg rounded-full border border-base/10 hover:border-primary bg-white/60 dark:bg-black/40 transition"
           aria-label="Open settings"
         >
           <Icon size={20} icon={"solar:settings-bold"} />

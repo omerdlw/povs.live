@@ -5,6 +5,7 @@ import { useStreamer } from "@/contexts/streamer-context";
 import { useSettings } from "@/contexts/settings-context";
 import StreamerCard from "@/components/streamer";
 import Icon from "@/components/icon";
+import { StreamerCardSkeleton } from "@/components/shared/skeletons";
 import { useEffect, useMemo, useState } from "react";
 import { apiService } from "@/services/firebase.service";
 import { usePathname } from "next/navigation";
@@ -132,10 +133,16 @@ export default function HomePage() {
         </div>
       )}
       {loadingStreamers ? (
-        <div className="fixed inset-0 flex justify-center items-center z-10">
-          <div className="animate-spin">
-            <Icon icon="mingcute:loading-3-fill" size={40} />
+        <div className="w-full h-auto p-5 sm:p-10 pt-10 space-y-6">
+          <div className="flex flex-wrap gap-6">
+            {[...Array(60)].map((_, index) => (
+              <StreamerCardSkeleton
+                key={index}
+                isLarge={settings.largeStreamerCard && index < 6}
+              />
+            ))}
           </div>
+          <div className="h-32"></div>
         </div>
       ) : (
         <div className="w-full h-auto p-5 sm:p-10 pt-10 space-y-6">

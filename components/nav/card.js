@@ -65,7 +65,7 @@ export default function Card({
 
   return (
     <motion.div
-      className={`absolute left-1/2 -translate-x-1/2 w-full h-auto cursor-pointer rounded-primary bg-white/80 dark:bg-black/40 backdrop-blur-lg border p-3 transition-colors duration-200 ease-linear transform-gpu will-change-transform ${
+      className={`absolute left-1/2 -translate-x-1/2 w-full h-auto cursor-pointer rounded-primary bg-white/80 dark:bg-black/40 backdrop-blur-lg border p-3 transition transform-gpu will-change-transform ${
         expanded
           ? isIndividualHovered
             ? "border-primary"
